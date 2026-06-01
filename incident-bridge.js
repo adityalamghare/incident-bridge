@@ -64,8 +64,12 @@ async function heartbeat() {
 /* ---------- FireHydrant signature verification (shared HMAC-SHA256 hex style) ---------- */
 function verifyFireHydrantSig(rawBody, signature, secret) {
   if (!secret) return true; // skip if no signing secret configured
-  const expected = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
-  try { return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(signature || "")); }
+  const hex = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
+  // Accept both raw hex and "sha256=<hex>" prefix (FireHydrant / GitHub style)
+  const sig = signature || "";
+  const normalized = sig.startsWith("sha256=") ? sig.slice(7) : sig;
+  console.log(`sig check — received: ${sig}, computed hex: ${hex}`);
+  try { return crypto.timingSafeEqual(Buffer.from(hex), Buffer.from(normalized)); }
   catch { return false; }
 }
 
@@ -106,7 +110,10 @@ app.post("/rollback", async (req, res) => {
   const raw = req.body.toString("utf8");
   // Confirm the exact header name in FireHydrant > Command Extension logs.
   const sig = req.headers["firehydrant-signature"] || req.headers["x-firehydrant-signature"];
-  if (!verifyFireHydrantSig(raw, sig, FH_COMMAND_SIGNING_SECRET)) return res.status(401).send("bad signature");
+  if (!verifyFireHydrantSig(raw, sig, FH_COMMAND_SIGNING_SECRET)) {
+    console.log(`/rollback 401 — header: ${sig}, body snippet: ${raw.slice(0, 120)}`);
+    return res.status(401).send("bad signature");
+  }
   res.sendStatus(200); // ack immediately so FireHydrant doesn't time out
 
   let payload = {};
