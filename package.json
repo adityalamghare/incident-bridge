@@ -1,0 +1,16 @@
+{
+  "name": "incident-bridge",
+  "version": "1.0.0",
+  "description": "FireHydrant heartbeat + Vercel rollback bridge — always-on companion to SkillHub",
+  "main": "incident-bridge.js",
+  "scripts": {
+    "start": "node incident-bridge.js",
+    "dev": "node --watch incident-bridge.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
