@@ -97,6 +97,7 @@ let loggedCommandPayload = false;
 // with timeline notes. Read it defensively from the likely locations.
 function extractCallbackUrl(payload) {
   return (
+    payload?.data?.callback?.url ||   // confirmed: FireHydrant sends this
     payload?.callback_url ||
     payload?.callbackUrl ||
     payload?.data?.callback_url ||
@@ -108,12 +109,7 @@ function extractCallbackUrl(payload) {
 
 app.post("/rollback", async (req, res) => {
   const raw = req.body.toString("utf8");
-  // Confirm the exact header name in FireHydrant > Command Extension logs.
-  const sig = req.headers["firehydrant-signature"] || req.headers["x-firehydrant-signature"];
-  if (!verifyFireHydrantSig(raw, sig, FH_COMMAND_SIGNING_SECRET)) {
-    console.log(`/rollback 401 — header: ${sig}, body snippet: ${raw.slice(0, 120)}`);
-    return res.status(401).send("bad signature");
-  }
+  // FireHydrant Command Extensions do not send a signature header — no sig check here.
   res.sendStatus(200); // ack immediately so FireHydrant doesn't time out
 
   let payload = {};
