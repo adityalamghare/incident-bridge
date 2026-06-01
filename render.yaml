@@ -12,11 +12,7 @@ services:
         sync: false
       - key: FH_WEBHOOK_SIGNING_KEY
         sync: false
-      - key: SLACK_BOT_TOKEN
-        sync: false
-      - key: SLACK_SIGNING_SECRET
-        sync: false
-      - key: SLACK_CHANNEL_ID
+      - key: FH_COMMAND_SIGNING_SECRET
         sync: false
       - key: VERCEL_TOKEN
         sync: false
