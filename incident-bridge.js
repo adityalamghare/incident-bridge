@@ -166,6 +166,8 @@ async function rollbackVercel() {
   const rb = await fetch(`https://api.vercel.com/v9/projects/${VERCEL_PROJECT_ID}/rollback/${target}${teamQuery}`, {
     method: "POST", headers: { ...vercelAuth, "Content-Type": "application/json" }, body: "{}",
   });
+  const rbText = await rb.text();
+  console.log(`Vercel rollback response: ${rb.status} ${rb.statusText} — ${rbText}`);
   return { ok: rb.ok, target };
 }
 
